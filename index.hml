@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Home</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #333333;
+            --text-muted: #555555;
+            --border-color: #f0f0f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
+
+        section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .link-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .link-item:hover { color: #000; }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 12px;
+            border-radius: 2px;
+            object-fit: contain;
+        }
+
+        .plus-button {
+            width: 28px;
+            height: 28px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            color: #888;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="column">
+        <section>
+            <h2>Social</h2>
+            <div class="link-list">
+                <a href="https://twitter.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=twitter.com" class="icon"> Twitter</a>
+                <a href="https://linkedin.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=linkedin.com" class="icon"> LinkedIn</a>
+            </div>
+        </section>
+
+        <section>
+            <h2>News</h2>
+            <div class="link-list">
+                <a href="https://www.tijd.be" class="link-item"><img src="https://www.google.com/s2/favicons?domain=tijd.be" class="icon"> De Tijd</a>
+                <a href="https://www.ft.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=ft.com" class="icon"> Financial Times</a>
+                <a href="https://www.nytimes.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=nytimes.com" class="icon"> The New York Times</a>
+                <a href="https://www.eurointelligence.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=eurointelligence.com" class="icon"> EuroIntelligence</a>
+                <a href="https://www.euractiv.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=euractiv.com" class="icon"> Euractiv</a>
+                <a href="https://www.semafor.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=semafor.com" class="icon"> Semafor</a>
+                <a href="https://ground.news" class="link-item"><img src="https://www.google.com/s2/favicons?domain=ground.news" class="icon"> Ground News</a>
+                <a href="https://www.project-syndicate.org" class="link-item"><img src="https://www.google.com/s2/favicons?domain=project-syndicate.org" class="icon"> Project Syndicate</a>
+                <a href="https://www.politico.eu" class="link-item"><img src="https://www.google.com/s2/favicons?domain=politico.eu" class="icon"> Politico.eu</a>
+                <a href="https://www.zerohedge.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=zerohedge.com" class="icon"> ZeroHedge</a>
+                <a href="https://www.spacedaily.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=spacedaily.com" class="icon"> Space Daily</a>
+                <a href="https://siliconcontinent.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=siliconcontinent.com" class="icon"> Siliconcontinent.com</a>
+                <a href="https://www.computable.be" class="link-item"><img src="https://www.google.com/s2/favicons?domain=computable.be" class="icon"> Computable.be</a>
+                <a href="https://www.vrt.be/vrtnws" class="link-item"><img src="https://www.google.com/s2/favicons?domain=vrt.be" class="icon"> VRT</a>
+                <a href="https://store.stratnews.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=stratnews.com" class="icon"> Store.stratnews.com</a>
+                <a href="https://www.standaard.be" class="link-item"><img src="https://www.google.com/s2/favicons?domain=standaard.be" class="icon"> De Standaard</a>
+            </div>
+        </section>
+    </div>
+
+    <div class="column">
+        <section>
+            <h2>Inspiration</h2>
+            <div class="link-list">
+                <a href="https://marginalrevolution.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=marginalrevolution.com" class="icon"> Marginal REVOLUTION</a>
+                <a href="https://thezvi.substack.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=substack.com" class="icon"> thezvi</a>
+                <a href="https://astralcodexten.substack.com" class="link-item"><img src="https://www.google.com/s2/favicons?domain=substack.com" class="icon"> Astral Codex 10</a>
+		<a href="https://https://restofworld.org/" class="link-item"><img src="https://www.google.com/s2/favicons?domain=restofworld.org" class="icon"> rest of world 10</a>
+		<a href="https://unherd.com/" class="link-item"><img src="https://www.google.com/s2/favicons?domain=unherd.com" class="icon"> UnHerd</a>
+
+
