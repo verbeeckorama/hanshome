@@ -717,6 +717,24 @@
             color: var(--text-muted);
             margin: 0 0 12px 0;
         }
+
+        .auto-backup-row {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .auto-backup-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        .toggle-switch.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -762,6 +780,11 @@
             <button class="sync-btn secondary" onclick="syncFromGist()" id="pullBtn">⬇️ Pull from Gist</button>
         </div>
         <div class="sync-status" id="syncStatus" style="display: none;"></div>
+        <div class="setting-row auto-backup-row" id="autoCloudRow">
+            <span class="setting-label">Auto-backup on changes</span>
+            <div class="toggle-switch disabled" id="autoCloudToggle" onclick="toggleAutoCloud()"></div>
+        </div>
+        <div class="auto-backup-hint" id="autoCloudHint">Push to Gist first to enable auto-backup</div>
     </div>
 
     <div class="settings-section">
@@ -771,6 +794,11 @@
             <button class="sync-btn primary" onclick="exportData()">📥 Export to File</button>
             <button class="sync-btn secondary" onclick="document.getElementById('fileInput').click()">📤 Import from File</button>
         </div>
+        <div class="setting-row auto-backup-row" id="autoLocalRow">
+            <span class="setting-label">Auto-backup on changes</span>
+            <div class="toggle-switch disabled" id="autoLocalToggle" onclick="toggleAutoLocal()"></div>
+        </div>
+        <div class="auto-backup-hint" id="autoLocalHint">Export a file first to enable auto-backup</div>
     </div>
 </div>
 
@@ -892,6 +920,31 @@
         if (showMessage) {
             showStatus('Changes saved!');
         }
+        // Trigger auto-backups if enabled
+        triggerAutoBackups();
+    }
+
+    // Trigger auto-backups
+    function triggerAutoBackups() {
+        isAutoBackupInProgress = true;
+        if (settings.autoBackupCloud && loadGistSettings().gistId) {
+            syncToGist();
+        }
+        if (settings.autoBackupLocal && localStorage.getItem('localBackupEnabled')) {
+            silentExportData();
+        }
+        isAutoBackupInProgress = false;
+    }
+
+    // Silent export (for auto-backup, no confirmation)
+    function silentExportData() {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `my-home-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     // Show status message
@@ -912,12 +965,18 @@
         const saved = localStorage.getItem('homepageSettings');
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                return {
+                    darkMode: parsed.darkMode || false,
+                    largeIcons: parsed.largeIcons || false,
+                    autoBackupCloud: parsed.autoBackupCloud || false,
+                    autoBackupLocal: parsed.autoBackupLocal || false
+                };
             } catch {
-                return { darkMode: false, largeIcons: false };
+                return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false };
             }
         }
-        return { darkMode: false, largeIcons: false };
+        return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false };
     }
 
     // Save settings
@@ -932,6 +991,62 @@
         document.getElementById('darkModeToggle').classList.toggle('on', settings.darkMode);
         document.getElementById('largeIconsToggle').classList.toggle('on', settings.largeIcons);
         applyGistSettings();
+        applyAutoBackupSettings();
+    }
+
+    // Apply auto-backup toggle states
+    function applyAutoBackupSettings() {
+        const gistId = loadGistSettings().gistId;
+        const localEnabled = localStorage.getItem('localBackupEnabled');
+        
+        const autoCloudToggle = document.getElementById('autoCloudToggle');
+        const autoCloudHint = document.getElementById('autoCloudHint');
+        const autoLocalToggle = document.getElementById('autoLocalToggle');
+        const autoLocalHint = document.getElementById('autoLocalHint');
+        
+        // Cloud auto-backup
+        if (gistId) {
+            autoCloudToggle.classList.remove('disabled');
+            autoCloudToggle.classList.toggle('on', settings.autoBackupCloud);
+            autoCloudHint.style.display = 'none';
+        } else {
+            autoCloudToggle.classList.add('disabled');
+            autoCloudToggle.classList.remove('on');
+            autoCloudHint.style.display = 'block';
+            settings.autoBackupCloud = false;
+        }
+        
+        // Local auto-backup
+        if (localEnabled) {
+            autoLocalToggle.classList.remove('disabled');
+            autoLocalToggle.classList.toggle('on', settings.autoBackupLocal);
+            autoLocalHint.style.display = 'none';
+        } else {
+            autoLocalToggle.classList.add('disabled');
+            autoLocalToggle.classList.remove('on');
+            autoLocalHint.style.display = 'block';
+            settings.autoBackupLocal = false;
+        }
+    }
+
+    // Toggle auto cloud backup
+    function toggleAutoCloud() {
+        const gistId = loadGistSettings().gistId;
+        if (!gistId) return; // Can't toggle if no gist
+        
+        settings.autoBackupCloud = !settings.autoBackupCloud;
+        saveSettings();
+        applyAutoBackupSettings();
+    }
+
+    // Toggle auto local backup
+    function toggleAutoLocal() {
+        const localEnabled = localStorage.getItem('localBackupEnabled');
+        if (!localEnabled) return; // Can't toggle if never exported
+        
+        settings.autoBackupLocal = !settings.autoBackupLocal;
+        saveSettings();
+        applyAutoBackupSettings();
     }
 
     // Toggle settings panel
@@ -999,8 +1114,13 @@
         statusEl.style.display = 'block';
     }
 
+    // Flag to prevent recursive auto-backup
+    let isAutoBackupInProgress = false;
+
     // Push data to Gist
     async function syncToGist() {
+        if (isAutoBackupInProgress) return; // Prevent recursive calls
+        
         const { token, gistId } = loadGistSettings();
         
         if (!token) {
@@ -1066,6 +1186,8 @@
                 document.getElementById('gistId').value = result.id;
                 localStorage.setItem('gistId', result.id);
                 showSyncStatus(`✓ Created new Gist! ID: ${result.id}`, 'success');
+                updateGistLink(result.id);
+                applyAutoBackupSettings();
             }
         } catch (error) {
             showSyncStatus(`✗ Error: ${error.message}`, 'error');
@@ -1165,6 +1287,9 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showStatus('Exported successfully!');
+        // Enable local auto-backup option
+        localStorage.setItem('localBackupEnabled', 'true');
+        applyAutoBackupSettings();
     }
 
     // Import data from JSON file
