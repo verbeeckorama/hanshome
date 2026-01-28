@@ -558,9 +558,11 @@
     }
 
     // Save data to localStorage
-    function saveData() {
+    function saveData(showMessage = true) {
         localStorage.setItem('homepageData', JSON.stringify(data));
-        showStatus('Changes saved!');
+        if (showMessage) {
+            showStatus('Changes saved!');
+        }
     }
 
     // Show status message
@@ -673,7 +675,7 @@
     // Switch to a tab
     function switchTab(tabId) {
         data.activeTabId = tabId;
-        saveData();
+        saveData(false);
         render();
     }
 
