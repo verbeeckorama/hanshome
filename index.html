@@ -750,6 +750,7 @@
         <div class="setting-input-row">
             <label class="setting-input-label">Gist ID (leave empty to create new)</label>
             <input type="text" class="setting-input" id="gistId" placeholder="abc123..." onchange="saveGistSettings()">
+            <a href="#" id="gistLink" class="gist-link" target="_blank" style="display: none;">🔗 View Gist on GitHub</a>
         </div>
         <div class="sync-buttons">
             <button class="sync-btn primary" onclick="syncToGist()" id="pushBtn">⬆️ Push to Gist</button>
@@ -954,6 +955,7 @@
         const gistId = document.getElementById('gistId').value.trim();
         localStorage.setItem('gistToken', token);
         localStorage.setItem('gistId', gistId);
+        updateGistLink(gistId);
     }
 
     // Apply Gist settings to UI
@@ -961,6 +963,18 @@
         const { token, gistId } = loadGistSettings();
         document.getElementById('gistToken').value = token;
         document.getElementById('gistId').value = gistId;
+        updateGistLink(gistId);
+    }
+
+    // Update Gist link visibility
+    function updateGistLink(gistId) {
+        const linkEl = document.getElementById('gistLink');
+        if (gistId) {
+            linkEl.href = `https://gist.github.com/${gistId}`;
+            linkEl.style.display = 'inline-block';
+        } else {
+            linkEl.style.display = 'none';
+        }
     }
 
     // Show sync status
