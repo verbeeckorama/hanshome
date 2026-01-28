@@ -43,10 +43,25 @@ A customizable personal homepage with bookmarks organized in tabs, sections, and
 
 ## Getting Started
 
-1. Open `index.html` in your browser
-2. Set it as your browser's homepage or new tab page
-3. Click **Edit** to start customizing
-4. Use **Settings** (⚙️) for appearance and backup options
+### Option 1: Use the Hosted Version (Easiest)
+Just visit **[https://verbeeckorama.github.io/hanshome/](https://verbeeckorama.github.io/hanshome/)** and set it as your browser's homepage. Your data is stored locally in your browser.
+
+### Option 2: Host on Your Own GitHub Pages (Free)
+1. **Fork this repository** - Click the "Fork" button at the top of this page
+2. **Enable GitHub Pages**:
+   - Go to your forked repo's **Settings** → **Pages**
+   - Under "Source", select **Deploy from a branch**
+   - Choose **main** branch and **/ (root)** folder
+   - Click **Save**
+3. **Access your homepage** at `https://YOUR-USERNAME.github.io/hanshome/`
+4. Set it as your browser's homepage or new tab page
+
+### Option 3: Run Locally
+1. Download or clone this repository
+2. Open `index.html` in your browser
+3. Set it as your browser's homepage
+
+Once running, click **Edit** to start customizing and use **Settings** (⚙️) for appearance and backup options.
 
 ## Cloud Sync Setup
 
