@@ -599,6 +599,118 @@
         #fileInput {
             display: none;
         }
+
+        /* Gist sync styles */
+        .settings-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .settings-section h4 {
+            margin: 0 0 15px 0;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: var(--bg-color);
+            color: var(--text-main);
+            box-sizing: border-box;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .setting-input-row {
+            margin-bottom: 10px;
+        }
+
+        .setting-input-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .sync-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .sync-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sync-btn.primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .sync-btn.primary:hover {
+            background: #0056b3;
+        }
+
+        .sync-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-main);
+        }
+
+        .sync-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .sync-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .sync-status {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .sync-status.success {
+            color: var(--success-color);
+        }
+
+        .sync-status.error {
+            color: var(--danger-color);
+        }
+
+        .gist-link {
+            font-size: 0.75rem;
+            color: var(--accent-color);
+            word-break: break-all;
+        }
+
+        .token-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .token-hint a {
+            color: var(--accent-color);
+        }
     </style>
 </head>
 <body>
@@ -626,6 +738,24 @@
     <div class="setting-row">
         <span class="setting-label">Large Icons</span>
         <div class="toggle-switch" id="largeIconsToggle" onclick="toggleLargeIcons()"></div>
+    </div>
+
+    <div class="settings-section">
+        <h4>☁️ Cloud Sync (GitHub Gist)</h4>
+        <div class="setting-input-row">
+            <label class="setting-input-label">GitHub Personal Access Token</label>
+            <input type="password" class="setting-input" id="gistToken" placeholder="ghp_xxxxxxxxxxxx" onchange="saveGistSettings()">
+            <div class="token-hint">Create at <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings</a> with 'gist' scope</div>
+        </div>
+        <div class="setting-input-row">
+            <label class="setting-input-label">Gist ID (leave empty to create new)</label>
+            <input type="text" class="setting-input" id="gistId" placeholder="abc123..." onchange="saveGistSettings()">
+        </div>
+        <div class="sync-buttons">
+            <button class="sync-btn primary" onclick="syncToGist()" id="pushBtn">⬆️ Push to Gist</button>
+            <button class="sync-btn secondary" onclick="syncFromGist()" id="pullBtn">⬇️ Pull from Gist</button>
+        </div>
+        <div class="sync-status" id="syncStatus" style="display: none;"></div>
     </div>
 </div>
 
@@ -786,6 +916,7 @@
         document.body.classList.toggle('large-icons', settings.largeIcons);
         document.getElementById('darkModeToggle').classList.toggle('on', settings.darkMode);
         document.getElementById('largeIconsToggle').classList.toggle('on', settings.largeIcons);
+        applyGistSettings();
     }
 
     // Toggle settings panel
@@ -806,6 +937,177 @@
         settings.largeIcons = !settings.largeIcons;
         saveSettings();
         applySettings();
+    }
+
+    // ===== GitHub Gist Sync =====
+    
+    // Load Gist settings
+    function loadGistSettings() {
+        const token = localStorage.getItem('gistToken') || '';
+        const gistId = localStorage.getItem('gistId') || '';
+        return { token, gistId };
+    }
+
+    // Save Gist settings
+    function saveGistSettings() {
+        const token = document.getElementById('gistToken').value.trim();
+        const gistId = document.getElementById('gistId').value.trim();
+        localStorage.setItem('gistToken', token);
+        localStorage.setItem('gistId', gistId);
+    }
+
+    // Apply Gist settings to UI
+    function applyGistSettings() {
+        const { token, gistId } = loadGistSettings();
+        document.getElementById('gistToken').value = token;
+        document.getElementById('gistId').value = gistId;
+    }
+
+    // Show sync status
+    function showSyncStatus(message, type = 'info') {
+        const statusEl = document.getElementById('syncStatus');
+        statusEl.textContent = message;
+        statusEl.className = 'sync-status ' + type;
+        statusEl.style.display = 'block';
+    }
+
+    // Push data to Gist
+    async function syncToGist() {
+        const { token, gistId } = loadGistSettings();
+        
+        if (!token) {
+            showSyncStatus('Please enter a GitHub token first.', 'error');
+            return;
+        }
+
+        const pushBtn = document.getElementById('pushBtn');
+        pushBtn.disabled = true;
+        pushBtn.textContent = '⏳ Pushing...';
+
+        try {
+            const content = JSON.stringify(data, null, 2);
+            
+            if (gistId) {
+                // Update existing Gist
+                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            'my-home-data.json': {
+                                content: content
+                            }
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                showSyncStatus(`✓ Pushed to Gist successfully!`, 'success');
+            } else {
+                // Create new Gist
+                const response = await fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        description: 'My Home - Homepage Data',
+                        public: false,
+                        files: {
+                            'my-home-data.json': {
+                                content: content
+                            }
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                // Save the new Gist ID
+                document.getElementById('gistId').value = result.id;
+                localStorage.setItem('gistId', result.id);
+                showSyncStatus(`✓ Created new Gist! ID: ${result.id}`, 'success');
+            }
+        } catch (error) {
+            showSyncStatus(`✗ Error: ${error.message}`, 'error');
+        } finally {
+            pushBtn.disabled = false;
+            pushBtn.textContent = '⬆️ Push to Gist';
+        }
+    }
+
+    // Pull data from Gist
+    async function syncFromGist() {
+        const { token, gistId } = loadGistSettings();
+        
+        if (!token) {
+            showSyncStatus('Please enter a GitHub token first.', 'error');
+            return;
+        }
+
+        if (!gistId) {
+            showSyncStatus('Please enter a Gist ID to pull from.', 'error');
+            return;
+        }
+
+        const pullBtn = document.getElementById('pullBtn');
+        pullBtn.disabled = true;
+        pullBtn.textContent = '⏳ Pulling...';
+
+        try {
+            const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                headers: {
+                    'Authorization': `token ${token}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            const file = result.files['my-home-data.json'];
+            
+            if (!file) {
+                throw new Error('Gist does not contain my-home-data.json');
+            }
+
+            const pulledData = JSON.parse(file.content);
+            
+            // Validate structure
+            if (!pulledData.tabs || !Array.isArray(pulledData.tabs)) {
+                throw new Error('Invalid data format in Gist');
+            }
+
+            // Confirm before overwriting
+            if (!confirm('This will replace all your local data with the data from Gist. Continue?')) {
+                showSyncStatus('Pull cancelled.', 'info');
+                return;
+            }
+
+            data = pulledData;
+            saveData(false);
+            render();
+            showSyncStatus('✓ Pulled from Gist successfully!', 'success');
+            showStatus('Data loaded from Gist!');
+
+        } catch (error) {
+            showSyncStatus(`✗ Error: ${error.message}`, 'error');
+        } finally {
+            pullBtn.disabled = false;
+            pullBtn.textContent = '⬇️ Pull from Gist';
+        }
     }
 
     // Get active tab
