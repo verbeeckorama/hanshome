@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Home - Local</title>
+    <title>My Home</title>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -12,6 +12,7 @@
             --border-color: #f0f0f0;
             --accent-color: #007bff;
             --danger-color: #dc3545;
+            --success-color: #28a745;
         }
 
         body {
@@ -25,24 +26,41 @@
             align-items: center;
         }
 
+        /* Header bar */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            gap: 10px;
+        }
+
         /* Tab Navigation */
         .tab-nav {
             display: flex;
             gap: 0;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--border-color);
-            width: 100%;
-            max-width: 1100px;
+            flex: 1;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .tab-link {
-            padding: 12px 24px;
+            padding: 12px 20px;
             text-decoration: none;
             color: var(--text-muted);
             font-weight: 500;
             border-bottom: 2px solid transparent;
             margin-bottom: -2px;
             transition: all 0.2s;
+            cursor: pointer;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            font-size: 0.95rem;
+            position: relative;
         }
 
         .tab-link:hover {
@@ -54,6 +72,106 @@
             border-bottom-color: var(--accent-color);
         }
 
+        /* Tab edit controls */
+        .tab-controls {
+            display: none;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            gap: 2px;
+        }
+
+        body.editing .tab-controls {
+            display: flex;
+        }
+
+        .tab-control-btn {
+            width: 18px;
+            height: 18px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 50%;
+            color: #666;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-control-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .tab-control-btn.delete:hover {
+            background: var(--danger-color);
+        }
+
+        /* Add tab button */
+        .add-tab-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 8px;
+            margin-bottom: -2px;
+            display: none;
+        }
+
+        body.editing .add-tab-btn {
+            display: block;
+        }
+
+        .add-tab-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* Header buttons */
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            padding-bottom: 10px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .header-btn.primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .header-btn.primary:hover {
+            background: #0056b3;
+        }
+
+        .header-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Dashboard */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -82,33 +200,6 @@
             font-size: 1.1rem;
             margin: 0;
             font-weight: 600;
-        }
-
-        /* Global edit mode toggle */
-        .edit-mode-toggle {
-            padding: 10px 20px;
-            background: #f0f0f0;
-            border: none;
-            border-radius: 6px;
-            color: #666;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            margin-left: auto;
-        }
-
-        .edit-mode-toggle:hover {
-            background: #e0e0e0;
-        }
-
-        .edit-mode-toggle.active {
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .edit-mode-toggle.active:hover {
-            background: #0056b3;
         }
 
         .link-list {
@@ -158,7 +249,6 @@
             display: flex;
         }
 
-        /* Edit mode visual indicators */
         body.editing .link-item-wrapper {
             background: #fafafa;
             border-radius: 4px;
@@ -256,41 +346,9 @@
             border-top: 2px solid var(--accent-color);
         }
 
-        /* Reset button */
-        .reset-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .reset-btn:hover {
-            background: #c82333;
-        }
-
-        /* Status indicator */
-        .status {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            padding: 8px 16px;
-            background: #28a745;
-            color: white;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .status.show {
-            opacity: 1;
+        body.editing .link-list.drag-over-section {
+            border-color: var(--accent-color);
+            background: #e8f4ff;
         }
 
         /* Add Section button */
@@ -316,12 +374,6 @@
             border-color: var(--accent-color);
             color: var(--accent-color);
             background: #f0f7ff;
-        }
-
-        /* Section drop zone for cross-section moves */
-        body.editing .link-list.drag-over-section {
-            border-color: var(--accent-color);
-            background: #e8f4ff;
         }
 
         /* Delete section button */
@@ -350,106 +402,138 @@
             color: white;
         }
 
-        /* Section header buttons container */
         .section-buttons {
             display: flex;
             gap: 4px;
         }
 
-        /* Header bar with tabs and edit toggle */
-        .header-bar {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            max-width: 1100px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--border-color);
+        /* Status indicator */
+        .status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 8px 16px;
+            background: var(--success-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .header-bar .tab-nav {
-            margin-bottom: 0;
-            border-bottom: none;
-            flex: 1;
+        .status.show {
+            opacity: 1;
+        }
+
+        /* Hidden file input */
+        #fileInput {
+            display: none;
+        }
+
+        /* Original link */
+        .original-link {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: -2px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .original-link:hover {
+            color: var(--text-main);
         }
     </style>
 </head>
 <body>
 
 <div class="header-bar">
-    <nav class="tab-nav">
-        <a href="index-original.html" class="tab-link">Original</a>
-        <a href="index.html" class="tab-link active">Local</a>
+    <nav class="tab-nav" id="tabNav">
+        <a href="index-original.html" class="original-link">Original</a>
+        <!-- Tabs will be rendered here -->
     </nav>
-    <button class="edit-mode-toggle" id="editToggle" onclick="toggleEditMode()">
-        ✏️ Edit Mode
-    </button>
+    <button class="add-tab-btn" onclick="addTab()">+ Add Tab</button>
+    <div class="header-buttons">
+        <button class="header-btn" onclick="toggleEditMode()" id="editToggle">✏️ Edit</button>
+        <button class="header-btn" onclick="exportData()">📥 Export</button>
+        <button class="header-btn" onclick="document.getElementById('fileInput').click()">📤 Import</button>
+    </div>
 </div>
+
+<input type="file" id="fileInput" accept=".json" onchange="importData(event)">
 
 <div class="dashboard" id="dashboard">
     <!-- Content will be loaded dynamically -->
 </div>
 
-<button class="reset-btn" onclick="resetToDefault()">Reset to Default</button>
 <div class="status" id="status">Changes saved!</div>
 
 <script>
-    // Default data structure
+    // Default data structure with tabs
     const defaultData = {
-        columns: [
+        activeTabId: 'main',
+        tabs: [
             {
-                sections: [
+                id: 'main',
+                name: 'Main',
+                columns: [
                     {
-                        id: 'social',
-                        title: 'Social',
-                        links: [
-                            { url: 'https://twitter.com', name: 'Twitter' },
-                            { url: 'https://linkedin.com', name: 'LinkedIn' }
+                        sections: [
+                            {
+                                id: 'social',
+                                title: 'Social',
+                                links: [
+                                    { url: 'https://twitter.com', name: 'Twitter' },
+                                    { url: 'https://linkedin.com', name: 'LinkedIn' }
+                                ]
+                            },
+                            {
+                                id: 'news',
+                                title: 'News',
+                                links: [
+                                    { url: 'https://www.tijd.be', name: 'De Tijd' },
+                                    { url: 'https://www.ft.com', name: 'Financial Times' },
+                                    { url: 'https://www.nytimes.com', name: 'The New York Times' },
+                                    { url: 'https://www.eurointelligence.com', name: 'EuroIntelligence' },
+                                    { url: 'https://www.euractiv.com', name: 'Euractiv' },
+                                    { url: 'https://www.semafor.com', name: 'Semafor' },
+                                    { url: 'https://ground.news', name: 'Ground News' },
+                                    { url: 'https://www.project-syndicate.org', name: 'Project Syndicate' },
+                                    { url: 'https://www.politico.eu', name: 'Politico.eu' },
+                                    { url: 'https://www.zerohedge.com', name: 'ZeroHedge' },
+                                    { url: 'https://www.spacedaily.com', name: 'Space Daily' },
+                                    { url: 'https://siliconcontinent.com', name: 'Siliconcontinent.com' },
+                                    { url: 'https://www.computable.be', name: 'Computable.be' },
+                                    { url: 'https://www.vrt.be/vrtnws', name: 'VRT' },
+                                    { url: 'https://store.stratnews.com', name: 'Store.stratnews.com' },
+                                    { url: 'https://www.standaard.be', name: 'De Standaard' }
+                                ]
+                            }
                         ]
                     },
                     {
-                        id: 'news',
-                        title: 'News',
-                        links: [
-                            { url: 'https://www.tijd.be', name: 'De Tijd' },
-                            { url: 'https://www.ft.com', name: 'Financial Times' },
-                            { url: 'https://www.nytimes.com', name: 'The New York Times' },
-                            { url: 'https://www.eurointelligence.com', name: 'EuroIntelligence' },
-                            { url: 'https://www.euractiv.com', name: 'Euractiv' },
-                            { url: 'https://www.semafor.com', name: 'Semafor' },
-                            { url: 'https://ground.news', name: 'Ground News' },
-                            { url: 'https://www.project-syndicate.org', name: 'Project Syndicate' },
-                            { url: 'https://www.politico.eu', name: 'Politico.eu' },
-                            { url: 'https://www.zerohedge.com', name: 'ZeroHedge' },
-                            { url: 'https://www.spacedaily.com', name: 'Space Daily' },
-                            { url: 'https://siliconcontinent.com', name: 'Siliconcontinent.com' },
-                            { url: 'https://www.computable.be', name: 'Computable.be' },
-                            { url: 'https://www.vrt.be/vrtnws', name: 'VRT' },
-                            { url: 'https://store.stratnews.com', name: 'Store.stratnews.com' },
-                            { url: 'https://www.standaard.be', name: 'De Standaard' }
+                        sections: [
+                            {
+                                id: 'inspiration',
+                                title: 'Inspiration',
+                                links: [
+                                    { url: 'https://marginalrevolution.com', name: 'Marginal Revolution' },
+                                    { url: 'https://thezvi.substack.com', name: 'thezvi' },
+                                    { url: 'https://astralcodexten.substack.com', name: 'Astral Codex 10' },
+                                    { url: 'https://restofworld.org/', name: 'Rest of World' },
+                                    { url: 'https://unherd.com/', name: 'UnHerd' },
+                                    { url: 'https://danwang.co/', name: 'Dan Wang' },
+                                    { url: 'https://www.construction-physics.com/', name: 'Construction Physics' },
+                                    { url: 'https://snscratchpad.com/', name: 'SNScratchpad' }
+                                ]
+                            }
                         ]
-                    }
-                ]
-            },
-            {
-                sections: [
+                    },
                     {
-                        id: 'inspiration',
-                        title: 'Inspiration',
-                        links: [
-                            { url: 'https://marginalrevolution.com', name: 'Marginal Revolution' },
-                            { url: 'https://thezvi.substack.com', name: 'thezvi' },
-                            { url: 'https://astralcodexten.substack.com', name: 'Astral Codex 10' },
-                            { url: 'https://restofworld.org/', name: 'Rest of World' },
-                            { url: 'https://unherd.com/', name: 'UnHerd' },
-                            { url: 'https://danwang.co/', name: 'Dan Wang' },
-                            { url: 'https://www.construction-physics.com/', name: 'Construction Physics' },
-                            { url: 'https://snscratchpad.com/', name: 'SNScratchpad' }
-                        ]
+                        sections: []
                     }
                 ]
-            },
-            {
-                sections: []
             }
         ]
     };
@@ -469,41 +553,48 @@
         const saved = localStorage.getItem('homepageData');
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                // Migration: convert old format to new tab-based format
+                if (parsed.columns && !parsed.tabs) {
+                    return {
+                        activeTabId: 'main',
+                        tabs: [{
+                            id: 'main',
+                            name: 'Main',
+                            columns: parsed.columns
+                        }]
+                    };
+                }
+                return parsed;
             } catch {
-                return defaultData;
+                return JSON.parse(JSON.stringify(defaultData));
             }
         }
-        return defaultData;
+        return JSON.parse(JSON.stringify(defaultData));
     }
 
     // Save data to localStorage
-    function saveData(data) {
+    function saveData() {
         localStorage.setItem('homepageData', JSON.stringify(data));
-        showStatus();
+        showStatus('Changes saved!');
     }
 
-    // Show save status
-    function showStatus() {
+    // Show status message
+    function showStatus(message) {
         const status = document.getElementById('status');
+        status.textContent = message;
         status.classList.add('show');
         setTimeout(() => status.classList.remove('show'), 2000);
     }
 
-    // Reset to default
-    function resetToDefault() {
-        if (confirm('Are you sure you want to reset all changes? This cannot be undone.')) {
-            localStorage.removeItem('homepageData');
-            render();
-            showStatus();
-        }
-    }
-
-    // Current data
+    // Current data and state
     let data = loadData();
-
-    // Global edit mode
     let isEditMode = false;
+
+    // Get active tab
+    function getActiveTab() {
+        return data.tabs.find(t => t.id === data.activeTabId) || data.tabs[0];
+    }
 
     // Toggle global edit mode
     function toggleEditMode() {
@@ -511,16 +602,165 @@
         document.body.classList.toggle('editing', isEditMode);
         const btn = document.getElementById('editToggle');
         btn.classList.toggle('active', isEditMode);
-        btn.textContent = isEditMode ? '✔️ Done Editing' : '✏️ Edit Mode';
+        btn.textContent = isEditMode ? '✔️ Done' : '✏️ Edit';
+    }
+
+    // Export data to JSON file
+    function exportData() {
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my-home-backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus('Exported successfully!');
+    }
+
+    // Import data from JSON file
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                // Validate structure
+                if (!imported.tabs || !Array.isArray(imported.tabs)) {
+                    throw new Error('Invalid format');
+                }
+                data = imported;
+                saveData();
+                render();
+                showStatus('Imported successfully!');
+            } catch (err) {
+                alert('Invalid file format. Please select a valid backup file.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // Reset input
+    }
+
+    // Render tabs
+    function renderTabs() {
+        const tabNav = document.getElementById('tabNav');
+        // Keep the original link
+        const originalLink = tabNav.querySelector('.original-link');
+        tabNav.innerHTML = '';
+        tabNav.appendChild(originalLink);
+
+        data.tabs.forEach(tab => {
+            const tabEl = document.createElement('button');
+            tabEl.className = 'tab-link' + (tab.id === data.activeTabId ? ' active' : '');
+            tabEl.textContent = tab.name;
+            tabEl.onclick = (e) => {
+                if (!e.target.closest('.tab-controls')) {
+                    switchTab(tab.id);
+                }
+            };
+
+            // Tab controls (rename, delete)
+            const controls = document.createElement('div');
+            controls.className = 'tab-controls';
+            
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'tab-control-btn';
+            renameBtn.innerHTML = '✏️';
+            renameBtn.title = 'Rename tab';
+            renameBtn.onclick = (e) => { e.stopPropagation(); renameTab(tab.id); };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'tab-control-btn delete';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.title = 'Delete tab';
+            deleteBtn.onclick = (e) => { e.stopPropagation(); deleteTab(tab.id); };
+
+            controls.appendChild(renameBtn);
+            if (data.tabs.length > 1) {
+                controls.appendChild(deleteBtn);
+            }
+            tabEl.appendChild(controls);
+
+            tabNav.appendChild(tabEl);
+        });
+    }
+
+    // Switch to a tab
+    function switchTab(tabId) {
+        data.activeTabId = tabId;
+        saveData();
+        render();
+    }
+
+    // Add a new tab
+    function addTab() {
+        const name = prompt('Enter tab name:');
+        if (!name || !name.trim()) return;
+
+        const newTab = {
+            id: 'tab-' + Date.now(),
+            name: name.trim(),
+            columns: [
+                { sections: [] },
+                { sections: [] },
+                { sections: [] }
+            ]
+        };
+
+        data.tabs.push(newTab);
+        data.activeTabId = newTab.id;
+        saveData();
+        render();
+    }
+
+    // Rename a tab
+    function renameTab(tabId) {
+        const tab = data.tabs.find(t => t.id === tabId);
+        if (!tab) return;
+
+        const newName = prompt('Enter new name:', tab.name);
+        if (!newName || !newName.trim()) return;
+
+        tab.name = newName.trim();
+        saveData();
+        render();
+    }
+
+    // Delete a tab
+    function deleteTab(tabId) {
+        if (data.tabs.length <= 1) {
+            alert('Cannot delete the last tab.');
+            return;
+        }
+
+        const tab = data.tabs.find(t => t.id === tabId);
+        if (!confirm(`Delete tab "${tab.name}" and all its content?`)) return;
+
+        const index = data.tabs.findIndex(t => t.id === tabId);
+        data.tabs.splice(index, 1);
+
+        // Switch to another tab if we deleted the active one
+        if (data.activeTabId === tabId) {
+            data.activeTabId = data.tabs[0].id;
+        }
+
+        saveData();
+        render();
     }
 
     // Render the dashboard
     function render() {
-        data = loadData();
+        renderTabs();
+
+        const activeTab = getActiveTab();
         const dashboard = document.getElementById('dashboard');
         dashboard.innerHTML = '';
 
-        data.columns.forEach((column, colIndex) => {
+        activeTab.columns.forEach((column, colIndex) => {
             const colDiv = document.createElement('div');
             colDiv.className = 'column';
             colDiv.dataset.col = colIndex;
@@ -632,7 +872,8 @@
 
     // Move a link up or down
     function moveLink(colIndex, secIndex, linkIndex, direction) {
-        const links = data.columns[colIndex].sections[secIndex].links;
+        const activeTab = getActiveTab();
+        const links = activeTab.columns[colIndex].sections[secIndex].links;
         const newIndex = linkIndex + direction;
         
         if (newIndex < 0 || newIndex >= links.length) return;
@@ -641,15 +882,16 @@
         links[linkIndex] = links[newIndex];
         links[newIndex] = temp;
         
-        saveData(data);
+        saveData();
         render();
     }
 
     // Delete a link
     function deleteLink(colIndex, secIndex, linkIndex) {
         if (confirm('Delete this link?')) {
-            data.columns[colIndex].sections[secIndex].links.splice(linkIndex, 1);
-            saveData(data);
+            const activeTab = getActiveTab();
+            activeTab.columns[colIndex].sections[secIndex].links.splice(linkIndex, 1);
+            saveData();
             render();
         }
     }
@@ -673,8 +915,9 @@
             url = 'https://' + url;
         }
         
-        data.columns[colIndex].sections[secIndex].links.push({ url, name });
-        saveData(data);
+        const activeTab = getActiveTab();
+        activeTab.columns[colIndex].sections[secIndex].links.push({ url, name });
+        saveData();
         render();
     }
 
@@ -716,19 +959,17 @@
         
         if (draggedElement === this) return;
         
+        const activeTab = getActiveTab();
         const targetData = {
             col: parseInt(this.closest('section').dataset.col),
             sec: parseInt(this.closest('section').dataset.sec),
             index: parseInt(this.dataset.index)
         };
         
-        // Get the link being moved
-        const movedLink = data.columns[draggedData.col].sections[draggedData.sec].links.splice(draggedData.index, 1)[0];
+        const movedLink = activeTab.columns[draggedData.col].sections[draggedData.sec].links.splice(draggedData.index, 1)[0];
+        activeTab.columns[targetData.col].sections[targetData.sec].links.splice(targetData.index, 0, movedLink);
         
-        // Insert at the target position
-        data.columns[targetData.col].sections[targetData.sec].links.splice(targetData.index, 0, movedLink);
-        
-        saveData(data);
+        saveData();
         render();
     }
 
@@ -740,7 +981,6 @@
         draggedData = null;
     }
 
-    // Handle dropping on the link-list itself (for empty sections or end of list)
     function handleLinkListDragOver(e) {
         e.preventDefault();
         if (!draggedElement || !isEditMode) return;
@@ -748,7 +988,6 @@
     }
 
     function handleLinkListDragLeave(e) {
-        // Only remove if we're leaving the link-list entirely
         if (!this.contains(e.relatedTarget)) {
             this.classList.remove('drag-over-section');
         }
@@ -760,19 +999,18 @@
         
         if (!draggedElement) return;
         
+        const activeTab = getActiveTab();
         const targetCol = parseInt(this.dataset.col);
         const targetSec = parseInt(this.dataset.sec);
         
-        // Don't process if dropping on same section at the end
         if (draggedData.col === targetCol && draggedData.sec === targetSec) {
-            return; // Let the individual link-item handle reordering
+            return;
         }
         
-        // Move link to end of target section
-        const movedLink = data.columns[draggedData.col].sections[draggedData.sec].links.splice(draggedData.index, 1)[0];
-        data.columns[targetCol].sections[targetSec].links.push(movedLink);
+        const movedLink = activeTab.columns[draggedData.col].sections[draggedData.sec].links.splice(draggedData.index, 1)[0];
+        activeTab.columns[targetCol].sections[targetSec].links.push(movedLink);
         
-        saveData(data);
+        saveData();
         render();
     }
 
@@ -781,27 +1019,25 @@
         const title = prompt('Enter section name:');
         if (!title || !title.trim()) return;
         
+        const activeTab = getActiveTab();
         const newSection = {
-            id: title.toLowerCase().replace(/\s+/g, '-'),
+            id: title.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
             title: title.trim(),
             links: []
         };
         
-        data.columns[colIndex].sections.push(newSection);
-        saveData(data);
+        activeTab.columns[colIndex].sections.push(newSection);
+        saveData();
         render();
     }
 
     // Delete a section
     function deleteSection(colIndex, secIndex) {
-        const section = data.columns[colIndex].sections[secIndex];
+        const activeTab = getActiveTab();
+        const section = activeTab.columns[colIndex].sections[secIndex];
         if (confirm(`Delete section "${section.title}" and all its links?`)) {
-            // Clean up editing state
-            const key = `${colIndex}-${secIndex}`;
-            editingSections.delete(key);
-            
-            data.columns[colIndex].sections.splice(secIndex, 1);
-            saveData(data);
+            activeTab.columns[colIndex].sections.splice(secIndex, 1);
+            saveData();
             render();
         }
     }
