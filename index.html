@@ -273,33 +273,13 @@
             --icon-size: 24px;
         }
 
-        /* Section colors */
-        section[data-color="red"] { border-left: 4px solid #dc3545; padding-left: 12px; }
-        section[data-color="orange"] { border-left: 4px solid #fd7e14; padding-left: 12px; }
-        section[data-color="yellow"] { border-left: 4px solid #ffc107; padding-left: 12px; }
-        section[data-color="green"] { border-left: 4px solid #28a745; padding-left: 12px; }
-        section[data-color="blue"] { border-left: 4px solid #007bff; padding-left: 12px; }
-        section[data-color="purple"] { border-left: 4px solid #6f42c1; padding-left: 12px; }
-
-        /* Collapsible sections */
-        .collapse-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 4px;
-            color: var(--text-muted);
-            transition: transform 0.2s;
-        }
-
-        .collapse-btn.collapsed {
-            transform: rotate(-90deg);
-        }
-
-        section.collapsed .link-list,
-        section.collapsed .add-link-form {
-            display: none !important;
-        }
+        /* Section colors - colored title background */
+        section[data-color="red"] h2 { background: #dc3545; color: white; padding: 6px 10px; border-radius: 4px; margin: -6px 0 -6px -10px; }
+        section[data-color="orange"] h2 { background: #fd7e14; color: white; padding: 6px 10px; border-radius: 4px; margin: -6px 0 -6px -10px; }
+        section[data-color="yellow"] h2 { background: #ffc107; color: #333; padding: 6px 10px; border-radius: 4px; margin: -6px 0 -6px -10px; }
+        section[data-color="green"] h2 { background: #28a745; color: white; padding: 6px 10px; border-radius: 4px; margin: -6px 0 -6px -10px; }
+        section[data-color="blue"] h2 { background: #007bff; color: white; padding: 6px 10px; border-radius: 4px; margin: -6px 0 -6px -10px; }
+        section[data-color="purple"] h2 { background: #6f42c1; color: white; padding: 6px 10px; border-radius: 4px; margin: -6px 0 -6px -10px; }
 
         /* Section drag styles */
         section.dragging {
@@ -998,24 +978,12 @@
             sectionEl.dataset.color = section.color;
         }
 
-        // Apply collapsed state
-        if (section.collapsed) {
-            sectionEl.classList.add('collapsed');
-        }
-
         // Section drag handlers
         sectionEl.addEventListener('dragstart', handleSectionDragStart);
         sectionEl.addEventListener('dragend', handleSectionDragEnd);
 
         const header = document.createElement('div');
         header.className = 'section-header';
-
-        // Collapse button
-        const collapseBtn = document.createElement('button');
-        collapseBtn.className = 'collapse-btn' + (section.collapsed ? ' collapsed' : '');
-        collapseBtn.innerHTML = '▼';
-        collapseBtn.title = 'Collapse/expand section';
-        collapseBtn.onclick = () => toggleSectionCollapse(colIndex, secIndex);
 
         const title = document.createElement('h2');
         title.textContent = section.title;
@@ -1049,7 +1017,6 @@
 
         buttonsDiv.appendChild(renameBtn);
         buttonsDiv.appendChild(deleteBtn);
-        header.appendChild(collapseBtn);
         header.appendChild(title);
         header.appendChild(colorPicker);
         header.appendChild(buttonsDiv);
@@ -1302,15 +1269,6 @@
             saveData();
             render();
         }
-    }
-
-    // Toggle section collapse
-    function toggleSectionCollapse(colIndex, secIndex) {
-        const activeTab = getActiveTab();
-        const section = activeTab.columns[colIndex].sections[secIndex];
-        section.collapsed = !section.collapsed;
-        saveData();
-        render();
     }
 
     // Set section color
