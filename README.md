@@ -2,6 +2,8 @@
 
 A customizable personal homepage with bookmarks organized in tabs, sections, and columns. All data is stored locally in your browser with optional cloud sync.
 
+**🔗 Live Demo:** [https://verbeeckorama.github.io/hanshome/](https://verbeeckorama.github.io/hanshome/)
+
 ## Features
 
 ### 📑 Multi-Tab Organization
