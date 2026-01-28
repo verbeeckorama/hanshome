@@ -7,12 +7,42 @@
     <style>
         :root {
             --bg-color: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f0f0f0;
             --text-main: #333333;
             --text-muted: #555555;
             --border-color: #f0f0f0;
             --accent-color: #007bff;
             --danger-color: #dc3545;
             --success-color: #28a745;
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            --bg-color: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --text-main: #e8e8e8;
+            --text-muted: #b0b0b0;
+            --border-color: #2a2a4a;
+        }
+
+        body.dark-mode .header-btn,
+        body.dark-mode .control-btn,
+        body.dark-mode .tab-control-btn,
+        body.dark-mode .delete-section-btn {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        body.dark-mode .link-item:hover {
+            color: #fff;
+        }
+
+        body.dark-mode .add-link-form input {
+            background: var(--bg-tertiary);
+            border-color: var(--border-color);
+            color: var(--text-main);
         }
 
         body {
@@ -232,11 +262,166 @@
         }
 
         .icon {
-            width: 16px;
-            height: 16px;
+            width: var(--icon-size, 16px);
+            height: var(--icon-size, 16px);
             margin-right: 12px;
             border-radius: 2px;
             object-fit: contain;
+        }
+
+        body.large-icons {
+            --icon-size: 24px;
+        }
+
+        /* Section colors */
+        section[data-color="red"] { border-left: 4px solid #dc3545; padding-left: 12px; }
+        section[data-color="orange"] { border-left: 4px solid #fd7e14; padding-left: 12px; }
+        section[data-color="yellow"] { border-left: 4px solid #ffc107; padding-left: 12px; }
+        section[data-color="green"] { border-left: 4px solid #28a745; padding-left: 12px; }
+        section[data-color="blue"] { border-left: 4px solid #007bff; padding-left: 12px; }
+        section[data-color="purple"] { border-left: 4px solid #6f42c1; padding-left: 12px; }
+
+        /* Collapsible sections */
+        .collapse-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .collapse-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        section.collapsed .link-list,
+        section.collapsed .add-link-form {
+            display: none !important;
+        }
+
+        /* Section drag styles */
+        section.dragging {
+            opacity: 0.5;
+        }
+
+        .column.drag-over-column {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        /* Color picker */
+        .color-picker {
+            display: none;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        body.editing .color-picker {
+            display: flex;
+        }
+
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .color-dot:hover,
+        .color-dot.active {
+            border-color: var(--text-main);
+        }
+
+        .color-dot.none { background: var(--bg-tertiary); }
+        .color-dot.red { background: #dc3545; }
+        .color-dot.orange { background: #fd7e14; }
+        .color-dot.yellow { background: #ffc107; }
+        .color-dot.green { background: #28a745; }
+        .color-dot.blue { background: #007bff; }
+        .color-dot.purple { background: #6f42c1; }
+
+        /* Settings panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--bg-color);
+            border-left: 1px solid var(--border-color);
+            padding: 20px;
+            transition: right 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-panel h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-label {
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch.on {
+            background: var(--accent-color);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.2s;
+        }
+
+        .toggle-switch.on::after {
+            left: 22px;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+        }
+
+        .settings-overlay.open {
+            display: block;
         }
 
         /* Edit mode controls */
@@ -281,6 +466,11 @@
 
         .control-btn:hover {
             background: #e0e0e0;
+        }
+
+        .control-btn.edit:hover {
+            background: var(--accent-color);
+            color: white;
         }
 
         .control-btn.delete:hover {
@@ -442,6 +632,20 @@
         <button class="header-btn" onclick="toggleEditMode()" id="editToggle">✏️ Edit</button>
         <button class="header-btn" onclick="exportData()">📥 Export</button>
         <button class="header-btn" onclick="document.getElementById('fileInput').click()">📤 Import</button>
+        <button class="header-btn" onclick="toggleSettings()">⚙️</button>
+    </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
+<div class="settings-panel" id="settingsPanel">
+    <h3>Settings</h3>
+    <div class="setting-row">
+        <span class="setting-label">Dark Mode</span>
+        <div class="toggle-switch" id="darkModeToggle" onclick="toggleDarkMode()"></div>
+    </div>
+    <div class="setting-row">
+        <span class="setting-label">Large Icons</span>
+        <div class="toggle-switch" id="largeIconsToggle" onclick="toggleLargeIcons()"></div>
     </div>
 </div>
 
@@ -576,6 +780,53 @@
     // Current data and state
     let data = loadData();
     let isEditMode = false;
+    let settings = loadSettings();
+
+    // Load settings from localStorage
+    function loadSettings() {
+        const saved = localStorage.getItem('homepageSettings');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch {
+                return { darkMode: false, largeIcons: false };
+            }
+        }
+        return { darkMode: false, largeIcons: false };
+    }
+
+    // Save settings
+    function saveSettings() {
+        localStorage.setItem('homepageSettings', JSON.stringify(settings));
+    }
+
+    // Apply settings on load
+    function applySettings() {
+        document.body.classList.toggle('dark-mode', settings.darkMode);
+        document.body.classList.toggle('large-icons', settings.largeIcons);
+        document.getElementById('darkModeToggle').classList.toggle('on', settings.darkMode);
+        document.getElementById('largeIconsToggle').classList.toggle('on', settings.largeIcons);
+    }
+
+    // Toggle settings panel
+    function toggleSettings() {
+        document.getElementById('settingsPanel').classList.toggle('open');
+        document.getElementById('settingsOverlay').classList.toggle('open');
+    }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+        settings.darkMode = !settings.darkMode;
+        saveSettings();
+        applySettings();
+    }
+
+    // Toggle large icons
+    function toggleLargeIcons() {
+        settings.largeIcons = !settings.largeIcons;
+        saveSettings();
+        applySettings();
+    }
 
     // Get active tab
     function getActiveTab() {
@@ -735,46 +986,51 @@
         render();
     }
 
-    // Render the dashboard
-    function render() {
-        renderTabs();
-
-        const activeTab = getActiveTab();
-        const dashboard = document.getElementById('dashboard');
-        dashboard.innerHTML = '';
-
-        activeTab.columns.forEach((column, colIndex) => {
-            const colDiv = document.createElement('div');
-            colDiv.className = 'column';
-            colDiv.dataset.col = colIndex;
-
-            column.sections.forEach((section, secIndex) => {
-                const sectionEl = createSection(section, colIndex, secIndex);
-                colDiv.appendChild(sectionEl);
-            });
-
-            // Add Section button
-            const addSectionBtn = document.createElement('button');
-            addSectionBtn.className = 'add-section-btn';
-            addSectionBtn.textContent = '+ Add Section';
-            addSectionBtn.onclick = () => addSection(colIndex);
-            colDiv.appendChild(addSectionBtn);
-
-            dashboard.appendChild(colDiv);
-        });
-    }
-
     // Create a section element
     function createSection(section, colIndex, secIndex) {
         const sectionEl = document.createElement('section');
         sectionEl.dataset.col = colIndex;
         sectionEl.dataset.sec = secIndex;
+        sectionEl.draggable = true;
+
+        // Apply section color
+        if (section.color) {
+            sectionEl.dataset.color = section.color;
+        }
+
+        // Apply collapsed state
+        if (section.collapsed) {
+            sectionEl.classList.add('collapsed');
+        }
+
+        // Section drag handlers
+        sectionEl.addEventListener('dragstart', handleSectionDragStart);
+        sectionEl.addEventListener('dragend', handleSectionDragEnd);
 
         const header = document.createElement('div');
         header.className = 'section-header';
 
+        // Collapse button
+        const collapseBtn = document.createElement('button');
+        collapseBtn.className = 'collapse-btn' + (section.collapsed ? ' collapsed' : '');
+        collapseBtn.innerHTML = '▼';
+        collapseBtn.title = 'Collapse/expand section';
+        collapseBtn.onclick = () => toggleSectionCollapse(colIndex, secIndex);
+
         const title = document.createElement('h2');
         title.textContent = section.title;
+
+        // Color picker
+        const colorPicker = document.createElement('div');
+        colorPicker.className = 'color-picker';
+        const colors = ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+        colors.forEach(color => {
+            const dot = document.createElement('button');
+            dot.className = 'color-dot ' + color + (section.color === color || (!section.color && color === 'none') ? ' active' : '');
+            dot.title = color === 'none' ? 'No color' : color;
+            dot.onclick = () => setSectionColor(colIndex, secIndex, color === 'none' ? null : color);
+            colorPicker.appendChild(dot);
+        });
 
         const buttonsDiv = document.createElement('div');
         buttonsDiv.className = 'section-buttons';
@@ -793,7 +1049,9 @@
 
         buttonsDiv.appendChild(renameBtn);
         buttonsDiv.appendChild(deleteBtn);
+        header.appendChild(collapseBtn);
         header.appendChild(title);
+        header.appendChild(colorPicker);
         header.appendChild(buttonsDiv);
         sectionEl.appendChild(header);
 
@@ -842,6 +1100,7 @@
         const controls = document.createElement('div');
         controls.className = 'edit-controls';
         controls.innerHTML = `
+            <button class="control-btn edit" onclick="editLink(${colIndex}, ${secIndex}, ${linkIndex})" title="Edit">✏️</button>
             <button class="control-btn up" onclick="moveLink(${colIndex}, ${secIndex}, ${linkIndex}, -1)" title="Move up">↑</button>
             <button class="control-btn down" onclick="moveLink(${colIndex}, ${secIndex}, ${linkIndex}, 1)" title="Move down">↓</button>
             <button class="control-btn delete" onclick="deleteLink(${colIndex}, ${secIndex}, ${linkIndex})" title="Delete">✕</button>
@@ -1045,7 +1304,142 @@
         }
     }
 
-    // Initial render
+    // Toggle section collapse
+    function toggleSectionCollapse(colIndex, secIndex) {
+        const activeTab = getActiveTab();
+        const section = activeTab.columns[colIndex].sections[secIndex];
+        section.collapsed = !section.collapsed;
+        saveData();
+        render();
+    }
+
+    // Set section color
+    function setSectionColor(colIndex, secIndex, color) {
+        const activeTab = getActiveTab();
+        const section = activeTab.columns[colIndex].sections[secIndex];
+        section.color = color;
+        saveData();
+        render();
+    }
+
+    // Edit link
+    function editLink(colIndex, secIndex, linkIndex) {
+        const activeTab = getActiveTab();
+        const link = activeTab.columns[colIndex].sections[secIndex].links[linkIndex];
+        
+        const newName = prompt('Enter link name:', link.name);
+        if (!newName || !newName.trim()) return;
+        
+        let newUrl = prompt('Enter link URL:', link.url);
+        if (!newUrl || !newUrl.trim()) return;
+        
+        if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
+            newUrl = 'https://' + newUrl;
+        }
+        
+        link.name = newName.trim();
+        link.url = newUrl.trim();
+        saveData();
+        render();
+    }
+
+    // Section drag and drop
+    let draggedSection = null;
+    let draggedSectionData = null;
+
+    function handleSectionDragStart(e) {
+        if (!isEditMode) {
+            e.preventDefault();
+            return;
+        }
+        // Don't start section drag if dragging a link
+        if (e.target.classList.contains('link-item-wrapper')) return;
+        
+        draggedSection = this;
+        draggedSectionData = {
+            col: parseInt(this.dataset.col),
+            sec: parseInt(this.dataset.sec)
+        };
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleSectionDragEnd(e) {
+        if (draggedSection) {
+            draggedSection.classList.remove('dragging');
+        }
+        document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
+        draggedSection = null;
+        draggedSectionData = null;
+    }
+
+    // Update column to accept section drops
+    function render() {
+        renderTabs();
+
+        const activeTab = getActiveTab();
+        const dashboard = document.getElementById('dashboard');
+        dashboard.innerHTML = '';
+
+        activeTab.columns.forEach((column, colIndex) => {
+            const colDiv = document.createElement('div');
+            colDiv.className = 'column';
+            colDiv.dataset.col = colIndex;
+
+            // Section drop handlers for columns
+            colDiv.addEventListener('dragover', handleColumnDragOver);
+            colDiv.addEventListener('dragleave', handleColumnDragLeave);
+            colDiv.addEventListener('drop', handleColumnDrop);
+
+            column.sections.forEach((section, secIndex) => {
+                const sectionEl = createSection(section, colIndex, secIndex);
+                colDiv.appendChild(sectionEl);
+            });
+
+            // Add Section button
+            const addSectionBtn = document.createElement('button');
+            addSectionBtn.className = 'add-section-btn';
+            addSectionBtn.textContent = '+ Add Section';
+            addSectionBtn.onclick = () => addSection(colIndex);
+            colDiv.appendChild(addSectionBtn);
+
+            dashboard.appendChild(colDiv);
+        });
+    }
+
+    function handleColumnDragOver(e) {
+        e.preventDefault();
+        if (!draggedSection || !isEditMode) return;
+        this.classList.add('drag-over-column');
+    }
+
+    function handleColumnDragLeave(e) {
+        if (!this.contains(e.relatedTarget)) {
+            this.classList.remove('drag-over-column');
+        }
+    }
+
+    function handleColumnDrop(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over-column');
+        
+        if (!draggedSection) return;
+        
+        const activeTab = getActiveTab();
+        const targetCol = parseInt(this.dataset.col);
+        
+        // Remove section from original position
+        const movedSection = activeTab.columns[draggedSectionData.col].sections.splice(draggedSectionData.sec, 1)[0];
+        
+        // Add to new column
+        activeTab.columns[targetCol].sections.push(movedSection);
+        
+        saveData();
+        render();
+    }
+
+    // Initial render and apply settings
+    applySettings();
     render();
 </script>
 
