@@ -274,6 +274,65 @@
         .status.show {
             opacity: 1;
         }
+
+        /* Add Section button */
+        .add-section-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .add-section-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: #f0f7ff;
+        }
+
+        /* Section drop zone for cross-section moves */
+        .link-list.drag-over-section {
+            background: #f0f7ff;
+            border-radius: 4px;
+            min-height: 40px;
+        }
+
+        /* Delete section button */
+        .delete-section-btn {
+            width: 24px;
+            height: 24px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            color: #888;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-left: 4px;
+        }
+
+        .editing .delete-section-btn {
+            display: flex;
+        }
+
+        .delete-section-btn:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Section header buttons container */
+        .section-buttons {
+            display: flex;
+            gap: 4px;
+        }
     </style>
 </head>
 <body>
@@ -412,11 +471,19 @@
         data.columns.forEach((column, colIndex) => {
             const colDiv = document.createElement('div');
             colDiv.className = 'column';
+            colDiv.dataset.col = colIndex;
 
             column.sections.forEach((section, secIndex) => {
                 const sectionEl = createSection(section, colIndex, secIndex);
                 colDiv.appendChild(sectionEl);
             });
+
+            // Add Section button
+            const addSectionBtn = document.createElement('button');
+            addSectionBtn.className = 'add-section-btn';
+            addSectionBtn.textContent = '+ Add Section';
+            addSectionBtn.onclick = () => addSection(colIndex);
+            colDiv.appendChild(addSectionBtn);
 
             dashboard.appendChild(colDiv);
         });
@@ -434,18 +501,36 @@
         const title = document.createElement('h2');
         title.textContent = section.title;
 
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'section-buttons';
+
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
         editBtn.innerHTML = '✏️';
         editBtn.title = 'Edit section';
         editBtn.onclick = () => toggleEdit(sectionEl, editBtn);
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-section-btn';
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.title = 'Delete section';
+        deleteBtn.onclick = () => deleteSection(colIndex, secIndex);
+
+        buttonsDiv.appendChild(editBtn);
+        buttonsDiv.appendChild(deleteBtn);
         header.appendChild(title);
-        header.appendChild(editBtn);
+        header.appendChild(buttonsDiv);
         sectionEl.appendChild(header);
 
         const linkList = document.createElement('div');
         linkList.className = 'link-list';
+        linkList.dataset.col = colIndex;
+        linkList.dataset.sec = secIndex;
+
+        // Allow dropping links into this section
+        linkList.addEventListener('dragover', handleLinkListDragOver);
+        linkList.addEventListener('dragleave', handleLinkListDragLeave);
+        linkList.addEventListener('drop', handleLinkListDrop);
 
         section.links.forEach((link, linkIndex) => {
             const wrapper = createLinkWrapper(link, colIndex, secIndex, linkIndex);
@@ -600,6 +685,7 @@
 
     function handleDrop(e) {
         e.preventDefault();
+        e.stopPropagation();
         this.classList.remove('drag-over');
         
         if (draggedElement === this) return;
@@ -610,14 +696,11 @@
             index: parseInt(this.dataset.index)
         };
         
-        // Only allow reordering within the same section
-        if (draggedData.col !== targetData.col || draggedData.sec !== targetData.sec) {
-            return;
-        }
+        // Get the link being moved
+        const movedLink = data.columns[draggedData.col].sections[draggedData.sec].links.splice(draggedData.index, 1)[0];
         
-        const links = data.columns[draggedData.col].sections[draggedData.sec].links;
-        const movedLink = links.splice(draggedData.index, 1)[0];
-        links.splice(targetData.index, 0, movedLink);
+        // Insert at the target position
+        data.columns[targetData.col].sections[targetData.sec].links.splice(targetData.index, 0, movedLink);
         
         saveData(data);
         render();
@@ -626,8 +709,77 @@
     function handleDragEnd(e) {
         this.classList.remove('dragging');
         document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        document.querySelectorAll('.drag-over-section').forEach(el => el.classList.remove('drag-over-section'));
         draggedElement = null;
         draggedData = null;
+    }
+
+    // Handle dropping on the link-list itself (for empty sections or end of list)
+    function handleLinkListDragOver(e) {
+        e.preventDefault();
+        if (!draggedElement) return;
+        const targetSection = this.closest('section');
+        if (!targetSection.classList.contains('editing')) return;
+        this.classList.add('drag-over-section');
+    }
+
+    function handleLinkListDragLeave(e) {
+        // Only remove if we're leaving the link-list entirely
+        if (!this.contains(e.relatedTarget)) {
+            this.classList.remove('drag-over-section');
+        }
+    }
+
+    function handleLinkListDrop(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over-section');
+        
+        if (!draggedElement) return;
+        
+        const targetCol = parseInt(this.dataset.col);
+        const targetSec = parseInt(this.dataset.sec);
+        
+        // Don't process if dropping on same section at the end
+        if (draggedData.col === targetCol && draggedData.sec === targetSec) {
+            return; // Let the individual link-item handle reordering
+        }
+        
+        // Move link to end of target section
+        const movedLink = data.columns[draggedData.col].sections[draggedData.sec].links.splice(draggedData.index, 1)[0];
+        data.columns[targetCol].sections[targetSec].links.push(movedLink);
+        
+        saveData(data);
+        render();
+    }
+
+    // Add a new section
+    function addSection(colIndex) {
+        const title = prompt('Enter section name:');
+        if (!title || !title.trim()) return;
+        
+        const newSection = {
+            id: title.toLowerCase().replace(/\s+/g, '-'),
+            title: title.trim(),
+            links: []
+        };
+        
+        data.columns[colIndex].sections.push(newSection);
+        saveData(data);
+        render();
+    }
+
+    // Delete a section
+    function deleteSection(colIndex, secIndex) {
+        const section = data.columns[colIndex].sections[secIndex];
+        if (confirm(`Delete section "${section.title}" and all its links?`)) {
+            // Clean up editing state
+            const key = `${colIndex}-${secIndex}`;
+            editingSections.delete(key);
+            
+            data.columns[colIndex].sections.splice(secIndex, 1);
+            saveData(data);
+            render();
+        }
     }
 
     // Initial render
