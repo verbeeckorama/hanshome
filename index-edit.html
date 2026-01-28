@@ -400,6 +400,9 @@
     // Current data
     let data = loadData();
 
+    // Track which sections are in edit mode (key: "col-sec")
+    const editingSections = new Set();
+
     // Render the dashboard
     function render() {
         data = loadData();
@@ -451,6 +454,13 @@
 
         sectionEl.appendChild(linkList);
 
+        // Restore edit mode if it was active
+        const key = `${colIndex}-${secIndex}`;
+        if (editingSections.has(key)) {
+            sectionEl.classList.add('editing');
+            editBtn.classList.add('active');
+        }
+
         // Add link form
         const addForm = document.createElement('div');
         addForm.className = 'add-link-form';
@@ -499,6 +509,12 @@
 
     // Toggle edit mode for a section
     function toggleEdit(sectionEl, btn) {
+        const key = `${sectionEl.dataset.col}-${sectionEl.dataset.sec}`;
+        if (sectionEl.classList.contains('editing')) {
+            editingSections.delete(key);
+        } else {
+            editingSections.add(key);
+        }
         sectionEl.classList.toggle('editing');
         btn.classList.toggle('active');
     }
