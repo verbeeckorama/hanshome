@@ -779,12 +779,19 @@
         const buttonsDiv = document.createElement('div');
         buttonsDiv.className = 'section-buttons';
 
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'delete-section-btn';
+        renameBtn.innerHTML = '✏️';
+        renameBtn.title = 'Rename section';
+        renameBtn.onclick = () => renameSection(colIndex, secIndex);
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-section-btn';
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.title = 'Delete section';
         deleteBtn.onclick = () => deleteSection(colIndex, secIndex);
 
+        buttonsDiv.appendChild(renameBtn);
         buttonsDiv.appendChild(deleteBtn);
         header.appendChild(title);
         header.appendChild(buttonsDiv);
@@ -1010,6 +1017,19 @@
         };
         
         activeTab.columns[colIndex].sections.push(newSection);
+        saveData();
+        render();
+    }
+
+    // Rename a section
+    function renameSection(colIndex, secIndex) {
+        const activeTab = getActiveTab();
+        const section = activeTab.columns[colIndex].sections[secIndex];
+        
+        const newName = prompt('Enter new section name:', section.title);
+        if (!newName || !newName.trim()) return;
+        
+        section.title = newName.trim();
         saveData();
         render();
     }
