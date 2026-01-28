@@ -711,6 +711,12 @@
         .token-hint a {
             color: var(--accent-color);
         }
+
+        .settings-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0 0 12px 0;
+        }
     </style>
 </head>
 <body>
@@ -722,8 +728,6 @@
     <button class="add-tab-btn" onclick="addTab()">+ Add Tab</button>
     <div class="header-buttons">
         <button class="header-btn" onclick="toggleEditMode()" id="editToggle">✏️ Edit</button>
-        <button class="header-btn" onclick="exportData()">📥 Export</button>
-        <button class="header-btn" onclick="document.getElementById('fileInput').click()">📤 Import</button>
         <button class="header-btn" onclick="toggleSettings()">⚙️</button>
     </div>
 </div>
@@ -741,7 +745,8 @@
     </div>
 
     <div class="settings-section">
-        <h4>☁️ Cloud Sync (GitHub Gist)</h4>
+        <h4>☁️ Cloud Backup (GitHub Gist)</h4>
+        <p class="settings-hint">Sync your data across devices using GitHub Gist.</p>
         <div class="setting-input-row">
             <label class="setting-input-label">GitHub Personal Access Token</label>
             <input type="password" class="setting-input" id="gistToken" placeholder="ghp_xxxxxxxxxxxx" onchange="saveGistSettings()">
@@ -757,6 +762,15 @@
             <button class="sync-btn secondary" onclick="syncFromGist()" id="pullBtn">⬇️ Pull from Gist</button>
         </div>
         <div class="sync-status" id="syncStatus" style="display: none;"></div>
+    </div>
+
+    <div class="settings-section">
+        <h4>💾 Local Backup (JSON File)</h4>
+        <p class="settings-hint">Export to file for manual backup or transfer.</p>
+        <div class="sync-buttons">
+            <button class="sync-btn primary" onclick="exportData()">📥 Export to File</button>
+            <button class="sync-btn secondary" onclick="document.getElementById('fileInput').click()">📤 Import from File</button>
+        </div>
     </div>
 </div>
 
