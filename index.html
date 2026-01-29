@@ -15,6 +15,8 @@
             --accent-color: #007bff;
             --danger-color: #dc3545;
             --success-color: #28a745;
+            --warning-color: #ffc107;
+            --column-count: 3;
         }
 
         /* Dark mode */
@@ -204,13 +206,37 @@
         /* Dashboard */
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(var(--column-count), 1fr);
             gap: 50px;
             max-width: 1100px;
             width: 100%;
         }
 
         @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
+
+        /* Dead link indicator */
+        .link-item.dead-link {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .link-item.dead-link::after {
+            content: ' ⚠️';
+            font-size: 0.8em;
+        }
+
+        /* Duplicate link indicator */
+        .link-item.duplicate-link {
+            background: rgba(255, 193, 7, 0.15);
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: -2px -4px;
+        }
+
+        .link-item.duplicate-link::after {
+            content: ' 🔄';
+            font-size: 0.8em;
+        }
 
         section {
             margin-bottom: 30px;
@@ -357,6 +383,16 @@
 
         .setting-label {
             font-size: 0.9rem;
+        }
+
+        .setting-row select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-main);
+            font-size: 0.9rem;
+            cursor: pointer;
         }
 
         .toggle-switch {
@@ -761,6 +797,24 @@
         <span class="setting-label">Large Icons</span>
         <div class="toggle-switch" id="largeIconsToggle" onclick="toggleLargeIcons()"></div>
     </div>
+    <div class="setting-row">
+        <span class="setting-label">Columns</span>
+        <select id="columnCountSelect" onchange="changeColumnCount(this.value)">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+    <div class="setting-row">
+        <span class="setting-label">Detect Dead Links</span>
+        <div class="toggle-switch" id="detectDeadLinksToggle" onclick="toggleDetectDeadLinks()"></div>
+    </div>
+    <div class="setting-row">
+        <span class="setting-label">Highlight Duplicates</span>
+        <div class="toggle-switch" id="highlightDuplicatesToggle" onclick="toggleHighlightDuplicates()"></div>
+    </div>
 
     <div class="settings-section">
         <h4>☁️ Free Cloud Backup (GitHub Gist)</h4>
@@ -932,13 +986,16 @@
                     darkMode: parsed.darkMode || false,
                     largeIcons: parsed.largeIcons || false,
                     autoBackupCloud: parsed.autoBackupCloud || false,
-                    autoBackupLocal: parsed.autoBackupLocal || false
+                    autoBackupLocal: parsed.autoBackupLocal || false,
+                    columnCount: parsed.columnCount || 3,
+                    detectDeadLinks: parsed.detectDeadLinks || false,
+                    highlightDuplicates: parsed.highlightDuplicates || false
                 };
             } catch {
-                return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false };
+                return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false, columnCount: 3, detectDeadLinks: false, highlightDuplicates: false };
             }
         }
-        return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false };
+        return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false, columnCount: 3, detectDeadLinks: false, highlightDuplicates: false };
     }
 
     // Save settings
@@ -952,6 +1009,15 @@
         document.body.classList.toggle('large-icons', settings.largeIcons);
         document.getElementById('darkModeToggle').classList.toggle('on', settings.darkMode);
         document.getElementById('largeIconsToggle').classList.toggle('on', settings.largeIcons);
+        
+        // Column count
+        document.documentElement.style.setProperty('--column-count', settings.columnCount);
+        document.getElementById('columnCountSelect').value = settings.columnCount;
+        
+        // Dead links and duplicates
+        document.getElementById('detectDeadLinksToggle').classList.toggle('on', settings.detectDeadLinks);
+        document.getElementById('highlightDuplicatesToggle').classList.toggle('on', settings.highlightDuplicates);
+        
         applyGistSettings();
         applyAutoBackupSettings();
     }
@@ -1029,6 +1095,118 @@
         settings.largeIcons = !settings.largeIcons;
         saveSettings();
         applySettings();
+    }
+
+    // Change column count
+    function changeColumnCount(count) {
+        settings.columnCount = parseInt(count);
+        saveSettings();
+        applySettings();
+        ensureColumnsExist();
+        render();
+    }
+
+    // Ensure we have enough columns in data
+    function ensureColumnsExist() {
+        const activeTab = getActiveTab();
+        while (activeTab.columns.length < settings.columnCount) {
+            activeTab.columns.push({ sections: [] });
+        }
+        // Optionally trim extra columns (move sections to last visible column)
+        while (activeTab.columns.length > settings.columnCount) {
+            const extraColumn = activeTab.columns.pop();
+            if (extraColumn.sections.length > 0) {
+                activeTab.columns[settings.columnCount - 1].sections.push(...extraColumn.sections);
+            }
+        }
+        saveData(false);
+    }
+
+    // Toggle detect dead links
+    function toggleDetectDeadLinks() {
+        settings.detectDeadLinks = !settings.detectDeadLinks;
+        saveSettings();
+        applySettings();
+        if (settings.detectDeadLinks) {
+            checkDeadLinks();
+        } else {
+            clearDeadLinkMarkers();
+        }
+    }
+
+    // Toggle highlight duplicates
+    function toggleHighlightDuplicates() {
+        settings.highlightDuplicates = !settings.highlightDuplicates;
+        saveSettings();
+        applySettings();
+        render();
+    }
+
+    // Check for dead links
+    let deadLinks = new Set();
+    
+    async function checkDeadLinks() {
+        deadLinks.clear();
+        showStatus('Checking links...');
+        
+        const allLinks = getAllLinks();
+        
+        for (const link of allLinks) {
+            try {
+                // Use a simple fetch with no-cors mode to detect basic issues
+                // Note: Due to CORS, we can only detect network errors, not HTTP status
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 5000);
+                
+                await fetch(link.url, { 
+                    method: 'HEAD', 
+                    mode: 'no-cors',
+                    signal: controller.signal 
+                });
+                clearTimeout(timeout);
+            } catch (error) {
+                deadLinks.add(link.url);
+            }
+        }
+        
+        showStatus(`Found ${deadLinks.size} potentially dead link(s)`);
+        render();
+    }
+
+    function clearDeadLinkMarkers() {
+        deadLinks.clear();
+        render();
+    }
+
+    // Get all links from all tabs
+    function getAllLinks() {
+        const links = [];
+        data.tabs.forEach(tab => {
+            tab.columns.forEach(col => {
+                col.sections.forEach(sec => {
+                    sec.links.forEach(link => {
+                        links.push(link);
+                    });
+                });
+            });
+        });
+        return links;
+    }
+
+    // Find duplicate URLs across all tabs
+    function findDuplicateUrls() {
+        const urlCount = {};
+        data.tabs.forEach(tab => {
+            tab.columns.forEach(col => {
+                col.sections.forEach(sec => {
+                    sec.links.forEach(link => {
+                        const normalizedUrl = link.url.toLowerCase().replace(/\/$/, '');
+                        urlCount[normalizedUrl] = (urlCount[normalizedUrl] || 0) + 1;
+                    });
+                });
+            });
+        });
+        return new Set(Object.keys(urlCount).filter(url => urlCount[url] > 1));
     }
 
     // ===== GitHub Gist Sync =====
@@ -1479,6 +1657,21 @@
         const linkEl = document.createElement('a');
         linkEl.href = link.url;
         linkEl.className = 'link-item';
+        
+        // Check for dead link
+        if (settings.detectDeadLinks && deadLinks.has(link.url)) {
+            linkEl.classList.add('dead-link');
+        }
+        
+        // Check for duplicate
+        if (settings.highlightDuplicates) {
+            const duplicateUrls = findDuplicateUrls();
+            const normalizedUrl = link.url.toLowerCase().replace(/\/$/, '');
+            if (duplicateUrls.has(normalizedUrl)) {
+                linkEl.classList.add('duplicate-link');
+            }
+        }
+        
         linkEl.innerHTML = `<img src="${getFaviconUrl(link.url)}" class="icon" alt="${link.name} favicon"> ${link.name}`;
 
         const controls = document.createElement('div');
