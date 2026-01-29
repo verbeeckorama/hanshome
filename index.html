@@ -214,17 +214,6 @@
 
         @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
 
-        /* Dead link indicator */
-        .link-item.dead-link {
-            opacity: 0.6;
-            text-decoration: line-through;
-        }
-
-        .link-item.dead-link::after {
-            content: ' ⚠️';
-            font-size: 0.8em;
-        }
-
         /* Duplicate link indicator */
         .link-item.duplicate-link {
             background: rgba(255, 193, 7, 0.15);
@@ -808,10 +797,6 @@
         </select>
     </div>
     <div class="setting-row">
-        <span class="setting-label">Detect Dead Links</span>
-        <div class="toggle-switch" id="detectDeadLinksToggle" onclick="toggleDetectDeadLinks()"></div>
-    </div>
-    <div class="setting-row">
         <span class="setting-label">Highlight Duplicates</span>
         <div class="toggle-switch" id="highlightDuplicatesToggle" onclick="toggleHighlightDuplicates()"></div>
     </div>
@@ -988,14 +973,13 @@
                     autoBackupCloud: parsed.autoBackupCloud || false,
                     autoBackupLocal: parsed.autoBackupLocal || false,
                     columnCount: parsed.columnCount || 3,
-                    detectDeadLinks: parsed.detectDeadLinks || false,
                     highlightDuplicates: parsed.highlightDuplicates || false
                 };
             } catch {
-                return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false, columnCount: 3, detectDeadLinks: false, highlightDuplicates: false };
+                return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false, columnCount: 3, highlightDuplicates: false };
             }
         }
-        return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false, columnCount: 3, detectDeadLinks: false, highlightDuplicates: false };
+        return { darkMode: false, largeIcons: false, autoBackupCloud: false, autoBackupLocal: false, columnCount: 3, highlightDuplicates: false };
     }
 
     // Save settings
@@ -1014,8 +998,7 @@
         document.documentElement.style.setProperty('--column-count', settings.columnCount);
         document.getElementById('columnCountSelect').value = settings.columnCount;
         
-        // Dead links and duplicates
-        document.getElementById('detectDeadLinksToggle').classList.toggle('on', settings.detectDeadLinks);
+        // Duplicates
         document.getElementById('highlightDuplicatesToggle').classList.toggle('on', settings.highlightDuplicates);
         
         applyGistSettings();
@@ -1122,75 +1105,12 @@
         saveData(false);
     }
 
-    // Toggle detect dead links
-    function toggleDetectDeadLinks() {
-        settings.detectDeadLinks = !settings.detectDeadLinks;
-        saveSettings();
-        applySettings();
-        if (settings.detectDeadLinks) {
-            checkDeadLinks();
-        } else {
-            clearDeadLinkMarkers();
-        }
-    }
-
     // Toggle highlight duplicates
     function toggleHighlightDuplicates() {
         settings.highlightDuplicates = !settings.highlightDuplicates;
         saveSettings();
         applySettings();
         render();
-    }
-
-    // Check for dead links
-    let deadLinks = new Set();
-    
-    async function checkDeadLinks() {
-        deadLinks.clear();
-        showStatus('Checking links...');
-        
-        const allLinks = getAllLinks();
-        
-        for (const link of allLinks) {
-            try {
-                // Use a simple fetch with no-cors mode to detect basic issues
-                // Note: Due to CORS, we can only detect network errors, not HTTP status
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-                
-                await fetch(link.url, { 
-                    method: 'HEAD', 
-                    mode: 'no-cors',
-                    signal: controller.signal 
-                });
-                clearTimeout(timeout);
-            } catch (error) {
-                deadLinks.add(link.url);
-            }
-        }
-        
-        showStatus(`Found ${deadLinks.size} potentially dead link(s)`);
-        render();
-    }
-
-    function clearDeadLinkMarkers() {
-        deadLinks.clear();
-        render();
-    }
-
-    // Get all links from all tabs
-    function getAllLinks() {
-        const links = [];
-        data.tabs.forEach(tab => {
-            tab.columns.forEach(col => {
-                col.sections.forEach(sec => {
-                    sec.links.forEach(link => {
-                        links.push(link);
-                    });
-                });
-            });
-        });
-        return links;
     }
 
     // Find duplicate URLs across all tabs
@@ -1657,11 +1577,6 @@
         const linkEl = document.createElement('a');
         linkEl.href = link.url;
         linkEl.className = 'link-item';
-        
-        // Check for dead link
-        if (settings.detectDeadLinks && deadLinks.has(link.url)) {
-            linkEl.classList.add('dead-link');
-        }
         
         // Check for duplicate
         if (settings.highlightDuplicates) {
