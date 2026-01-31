@@ -956,9 +956,9 @@
     // Get favicon URL
     function getFaviconUrl(url) {
         try {
-            // Skip placeholder URLs
+            // Skip placeholder URLs - return empty to hide icon
             if (url === '#' || url.startsWith('javascript:')) {
-                return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><text y="12" font-size="12">📌</text></svg>';
+                return '';
             }
             const domain = new URL(url).hostname;
             return `https://www.google.com/s2/favicons?domain=${domain}`;
@@ -1664,7 +1664,9 @@
             }
         }
         
-        linkEl.innerHTML = `<img src="${getFaviconUrl(link.url)}" class="icon" alt="${link.name} favicon"> ${link.name}`;
+        const faviconUrl = getFaviconUrl(link.url);
+        const iconHtml = faviconUrl ? `<img src="${faviconUrl}" class="icon" alt=""> ` : '';
+        linkEl.innerHTML = iconHtml + link.name;
 
         const controls = document.createElement('div');
         controls.className = 'edit-controls';
