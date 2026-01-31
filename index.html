@@ -868,23 +868,23 @@
                                 id: 'getting-started',
                                 title: '🚀 Getting Started',
                                 links: [
-                                    { url: 'javascript:void(0)', name: '1. Click the "Edit" button in the top right' },
-                                    { url: 'javascript:void(0)', name: '2. Add sections using "+ Add Section"' },
-                                    { url: 'javascript:void(0)', name: '3. Add links to sections using "+ Add link"' },
-                                    { url: 'javascript:void(0)', name: '4. Drag & drop to reorder links and sections' },
-                                    { url: 'javascript:void(0)', name: '5. Click "Edit" again to exit edit mode' }
+                                    { url: '#', name: '1. Go to the "Main" tab →' },
+                                    { url: '#', name: '2. Click "✏️ Edit" button (top right)' },
+                                    { url: '#', name: '3. Add sections with "+ Add Section"' },
+                                    { url: '#', name: '4. Add links with "+ Add link"' },
+                                    { url: '#', name: '5. Drag to reorder, click "✏️ Edit" to finish' },
+                                    { url: '#', name: '6. Delete this Help tab when ready!' }
                                 ]
                             },
                             {
                                 id: 'features',
                                 title: '✨ Features',
                                 links: [
-                                    { url: 'javascript:void(0)', name: '📎 Multi-Tab Organization - Create tabs for Work, Personal, etc.' },
-                                    { url: 'javascript:void(0)', name: '📁 Sections & Links - Organize bookmarks in sections' },
-                                    { url: 'javascript:void(0)', name: '🎨 Section Colors - Click color dots to customize' },
-                                    { url: 'javascript:void(0)', name: '🌙 Dark Mode - Toggle in Settings (⚙️)' },
-                                    { url: 'javascript:void(0)', name: '📱 Large Icons - Better favicon visibility' },
-                                    { url: 'javascript:void(0)', name: '📊 Columns - Choose 1-5 columns in Settings' }
+                                    { url: '#', name: '📑 Multi-Tab Organization' },
+                                    { url: '#', name: '📁 Sections & Links' },
+                                    { url: '#', name: '🎨 Section Colors' },
+                                    { url: '#', name: '🌙 Dark Mode (in Settings)' },
+                                    { url: '#', name: '📊 1-5 Columns (in Settings)' }
                                 ]
                             }
                         ]
@@ -895,20 +895,19 @@
                                 id: 'backup',
                                 title: '💾 Backup Options',
                                 links: [
-                                    { url: 'javascript:void(0)', name: '☁️ Cloud Backup - Sync via GitHub Gist (free)' },
-                                    { url: 'javascript:void(0)', name: '📂 Local Backup - Export/Import JSON files' },
-                                    { url: 'javascript:void(0)', name: '🔄 Auto-backup - Enable in Settings after first backup' },
-                                    { url: 'https://github.com/settings/tokens', name: '🔑 Get GitHub Token (for cloud sync)' }
+                                    { url: '#', name: '☁️ Cloud Backup via GitHub Gist' },
+                                    { url: '#', name: '📂 Local Backup via JSON export' },
+                                    { url: '#', name: '🔄 Auto-backup available' },
+                                    { url: 'https://github.com/settings/tokens', name: '🔑 Get GitHub Token →' }
                                 ]
                             },
                             {
                                 id: 'tips',
                                 title: '💡 Tips',
                                 links: [
-                                    { url: 'javascript:void(0)', name: 'Rename tabs by clicking them in Edit mode' },
-                                    { url: 'javascript:void(0)', name: 'Drag sections between columns' },
-                                    { url: 'javascript:void(0)', name: 'Delete this Help tab when you\'re ready!' },
-                                    { url: 'javascript:void(0)', name: 'Set this page as your browser homepage' }
+                                    { url: '#', name: '• Rename tabs in Edit mode' },
+                                    { url: '#', name: '• Drag sections between columns' },
+                                    { url: '#', name: '• Set as browser homepage' }
                                 ]
                             }
                         ]
@@ -919,9 +918,9 @@
                                 id: 'hosting',
                                 title: '🌐 Hosting Options',
                                 links: [
-                                    { url: 'https://verbeeckorama.github.io/hanshome/', name: '🔗 Use hosted version (easiest)' },
-                                    { url: 'https://github.com/verbeeckorama/hanshome', name: '🐙 Fork on GitHub for your own copy' },
-                                    { url: 'javascript:void(0)', name: '📥 Or download and run locally' }
+                                    { url: 'https://verbeeckorama.github.io/hanshome/', name: '🔗 Use hosted version' },
+                                    { url: 'https://github.com/verbeeckorama/hanshome', name: '🐙 Fork on GitHub' },
+                                    { url: '#', name: '📥 Or download locally' }
                                 ]
                             }
                         ]
@@ -957,6 +956,10 @@
     // Get favicon URL
     function getFaviconUrl(url) {
         try {
+            // Skip placeholder URLs
+            if (url === '#' || url.startsWith('javascript:')) {
+                return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><text y="12" font-size="12">📌</text></svg>';
+            }
             const domain = new URL(url).hostname;
             return `https://www.google.com/s2/favicons?domain=${domain}`;
         } catch {
