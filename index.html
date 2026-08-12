@@ -857,7 +857,7 @@
     <!-- Content will be loaded dynamically -->
 </div>
 
-<footer class="app-version" aria-label="Application version">My Home v1.1.0</footer>
+<footer class="app-version" aria-label="Application version">My Home v1.1.1</footer>
 
 <div class="status" id="status">Changes saved!</div>
 
@@ -1105,13 +1105,14 @@
     }
 
     // Save data to localStorage
-    function saveData(showMessage = true) {
+    function saveData(showMessage = true, triggerBackups = true) {
         localStorage.setItem('homepageData', JSON.stringify(data));
         if (showMessage) {
             showStatus('Changes saved!');
         }
-        // Trigger auto-backups if enabled
-        triggerAutoBackups();
+        if (triggerBackups) {
+            triggerAutoBackups();
+        }
     }
 
     // Trigger auto-backups
@@ -1618,7 +1619,7 @@
     // Switch to a tab
     function switchTab(tabId) {
         data.activeTabId = tabId;
-        saveData(false);
+        saveData(false, false);
         render();
     }
 
